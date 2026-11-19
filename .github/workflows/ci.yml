@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.18.0
+
+      - uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+
+      - run: npm ci
+
+      - run: npm test
+        env:
+          NODE_ENV: test
+
+      - if: always()
+        run: |
+          echo "## Résultat de la CI" >> $GITHUB_STEP_SUMMARY
+          echo "- Statut : ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Ref : ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit : ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
